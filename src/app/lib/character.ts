@@ -21,34 +21,6 @@ export const KeyInputMap = (() => {
   return map;
 })();
 
-export function getInputPattern(char: string) {
-
-  console.log("char", char);
-
-  const result = [];
-
-  const keywords: string[] = [];
-  for (let i = 0; i < char.length; i++) {
-    if (i === 0) {
-      keywords.push(char[i]);
-    } else {
-      keywords.push(keywords[i - 1] + char[i]);
-    }
-  }
-
-  for (const keyword of keywords) {
-    const patterns = KeyInputMap.get(keyword);
-    if (!patterns) {
-      return null;
-    }
-
-    result.push(patterns);
-  }
-
-  console.log(char, result);
-
-  return result;
-}
 
 type InputPattern = string[];
 
