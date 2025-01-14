@@ -25,6 +25,22 @@ describe("Text", () => {
     expect(patternsStringList).toEqual(expected);
   });
 
+  it("アンコール", () => {
+    const [ patternsStringList, expected ] = makeTestCases(
+      "アンコール",
+      [
+        "anko-ru",
+        "annko-ru",
+        "axnko-ru",
+        "anco-ru",
+        "annco-ru",
+        "axnco-ru",
+      ]
+    );
+
+    expect(patternsStringList).toEqual(expected);
+  });
+
   it("ちゃんと", () => {
 
     const [ patternsStringList, expected ] = makeTestCases(
