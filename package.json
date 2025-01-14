@@ -10,7 +10,8 @@
     "format": "biome format ./src",
     "lint": "biome lint ./src",
     "test": "biome test ./src",
-    "fix": "biome check --write ./src"
+    "fix": "biome check --write ./src",
+    "debug": "NODE_OPTIONS='--inspect' next dev"
   },
   "dependencies": {
     "@mogamoga1024/typing-jp": "^1.2.0",
