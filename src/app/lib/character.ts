@@ -1,23 +1,22 @@
-import { ContractedSound, KeyMap } from "../types";
+import { ContractedSound, KeyMap, Vowel } from "../types";
 import katakanaToHiragana from "./toHiragana";
 
 export const KeyInputMap = (() => {
   const map = new Map<string, string[]>();
 
-  [...Object.entries(KeyMap)].forEach(([pattern, kana]) => {
+  for (const [pattern, kana] of Object.entries(KeyMap)) {
     if (kana === null || kana === undefined) {
-      return;
+      continue;
     }
 
     const item = map.get(kana);
     if (!item) {
       map.set(kana, [pattern]);
-      return;
+      continue;
     }
 
     item.push(pattern);
-
-  });
+  }
 
   return map;
 })();
@@ -51,6 +50,8 @@ export function getInputPattern(char: string) {
   return result;
 }
 
+type InputPattern = string[];
+
 
 /**
  * ex) パンツ
@@ -64,34 +65,82 @@ export function getInputPattern(char: string) {
 export function createInputPatterns(text: string) {
   const t = katakanaToHiragana(text);
 
-  let result: string[][] = [ [] ];
+  const result: InputPattern[] = [[]];
 
   for (let i = 0; i < text.length; i++) {
 
     const char = t[i];
+    const nextChar = t[i + 1];
 
-    const patterns = KeyInputMap.get(char);
-    if (!patterns) {
+    const p1 = KeyInputMap.get(char);
+    if (!p1) {
       continue;
     }
 
-    console.log(char, patterns);
+    const insertPatternsList: InputPattern[][] = [];
 
-    if (patterns.length > 1) {
-      const copy = JSON.parse(JSON.stringify(result));
-      for (let j = 0; j < patterns.length - 1; j++) {
-        result = [
-          ...result,
-          ...copy
-        ]
+
+    if (!ContractedSound.includes(nextChar)) {
+
+      if (char === "ん" && !Vowel.includes(nextChar)) {
+        insertPatternsList.push([["n", ...p1]]);
+      } else {
+        insertPatternsList.push([p1]);
+      }
+
+    } else {
+
+      const p2 = KeyInputMap.get(nextChar);
+      const p3 = KeyInputMap.get(char + nextChar);
+
+      if (p3) {
+        insertPatternsList.push([p3]);
+      }
+
+      if (p2) {
+        insertPatternsList.push([p1, p2]);
+      }
+
+      i++;
+    }
+
+    const appendCount = insertPatternsList.reduce((acc, cur) => acc + Math.max(...cur.map(p => p.length)), 0);
+    if (appendCount > 1) {
+      const copy = JSON.stringify(result);
+      for (let j = 0; j < appendCount - 1; j++) {
+        result.push(...JSON.parse(copy));
       }
     }
 
-    for (let j = 0; j < result.length; j++) {
-      const pattern = patterns[j % patterns.length];
-      result[j].push(pattern);
+
+    const combinationList: InputPattern[] = [];
+    for (const patterns of insertPatternsList) {
+
+      const maxSize = Math.max(...patterns.map(p => p.length));
+
+      for (let j = 0; j < maxSize; j++) {
+
+        const list: InputPattern = [];
+
+        for (let k = 0; k < patterns.length; k++) {
+          const pattern = patterns[k];
+          if (!pattern) {
+            continue;
+          }
+
+          list.push(pattern[j % pattern.length]);
+        }
+
+        combinationList.push(list);
+
+      }
+
     }
-    console.log("result", result.length, result);
+
+    for (let j = 0; j < result.length; j++) {
+      const p = combinationList[j % combinationList.length];
+      result[j].push(...p);
+    }
   }
 
   return result;
