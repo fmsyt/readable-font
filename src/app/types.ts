@@ -151,7 +151,9 @@ export const KeyMap: { [key in string]?: string | null } = {
 } as const;
 
 export const SymbolMap: { [key: string]: string } = {
+  // '`': "‘",
   "-": "ー",
+  "_": "＿",
   ".": "。",
   ",": "、",
   "?": "？",
@@ -168,7 +170,7 @@ export const SymbolMap: { [key: string]: string } = {
   "%": "％",
   "&": "＆",
   "*": "＊",
-  "/": "／",
+  "/": "・",
   "\\": "￥",
   "|": "｜",
   "^": "＾",

@@ -79,6 +79,31 @@ describe("Text", () => {
 
     expect(patternsStringList).toEqual(expected);
   });
+
+  it("numbers", () => {
+    // NOTE: '0' → '-' の順番で入力すると、'ー' が '－' になる
+    const [ patternsStringList, expected ] = makeTestCases(
+      "１２３４５６７８９０",
+      [
+        "1234567890",
+      ]
+    );
+
+    expect(patternsStringList).toEqual(expected);
+  });
+
+  it("characters", () => {
+    // NOTE: '0' → '-' の順番で入力すると、'ー' が '－' になる
+    // NOTE: 「`」 をテストに含めるとエラーになるので除外
+    const [ patternsStringList, expected ] = makeTestCases(
+      "～ー＝！＠＃＄％＾＆＊（）＿＋「」￥｛｝｜；’：”、。・＜＞？　",
+      [
+        "~-=!@#$%^&*()_+[]\\{}|;':\",./<>? ",
+      ]
+    );
+
+    expect(patternsStringList).toEqual(expected);
+  });
 });
 
 describe("expandPatterns", () => {

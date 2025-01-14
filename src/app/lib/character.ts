@@ -1,10 +1,24 @@
-import { ContractedSound, KeyMap, Vowel } from "../types";
+import { ContractedSound, KeyMap, SymbolMap, Vowel } from "../types";
 import katakanaToHiragana from "./toHiragana";
 
 export const KeyInputMap = (() => {
   const map = new Map<string, string[]>();
 
   for (const [pattern, kana] of Object.entries(KeyMap)) {
+    if (kana === null || kana === undefined) {
+      continue;
+    }
+
+    const item = map.get(kana);
+    if (!item) {
+      map.set(kana, [pattern]);
+      continue;
+    }
+
+    item.push(pattern);
+  }
+
+  for (const [pattern, kana] of Object.entries(SymbolMap)) {
     if (kana === null || kana === undefined) {
       continue;
     }
