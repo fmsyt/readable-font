@@ -11,7 +11,8 @@
     "lint": "biome lint ./src",
     "test": "biome test ./src",
     "fix": "biome check --write ./src",
-    "debug": "NODE_OPTIONS='--inspect' next dev"
+    "debug": "NODE_OPTIONS='--inspect' next dev",
+    "test:jest": "jest"
   },
   "dependencies": {
     "@mogamoga1024/typing-jp": "^1.2.0",
@@ -21,7 +22,12 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.14",
     "daisyui": "^4.12.22",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
     "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^18",
