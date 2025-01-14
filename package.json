@@ -13,6 +13,7 @@
     "fix": "biome check --write ./src"
   },
   "dependencies": {
+    "@mogamoga1024/typing-jp": "^1.2.0",
     "react": "^18",
     "react-dom": "^18",
     "next": "14.2.14"

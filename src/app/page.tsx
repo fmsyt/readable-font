@@ -1,4 +1,9 @@
 import Playground from "./components/Playground";
+import { createInputPatterns } from "./lib/character";
+
+// createInputPatterns("パンツ");
+// createInputPatterns("あねう");
+createInputPatterns("ちゃんと");
 
 export default function Home() {
 	return (
