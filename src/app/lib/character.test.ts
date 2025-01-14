@@ -1,33 +1,83 @@
 import { createInputPatterns, expandPatterns } from "./character";
 
 describe("Text", () => {
-  it("ちゃんと", () => {
-    const patternsList = createInputPatterns("ちゃんと");
+
+  const makeTestCases = (text: string, expected: string[]) => {
+    const patternsList = createInputPatterns(text);
     const patternsStringList = patternsList.map((patterns) => patterns.join("")).sort();
 
-    expect(patternsStringList).toEqual([
-      "chanto",
-      "channto",
-      "chaxnto",
-      "tyanto",
-      "tyannto",
-      "tyaxnto",
-      "cyanto",
-      "cyannto",
-      "cyaxnto",
-      "tilyanto",
-      "tilyannto",
-      "tilyaxnto",
-      "chilyanto",
-      "chilyannto",
-      "chilyaxnto",
-      "tixyanto",
-      "tixyannto",
-      "tixyaxnto",
-      "chixyanto",
-      "chixyannto",
-      "chixyaxnto",
-    ].sort());
+    return [ patternsStringList, expected.sort() ] as const;
+  }
+
+  it("あんこ", () => {
+    const [ patternsStringList, expected ] = makeTestCases(
+      "あんこ",
+      [
+        "anko",
+        "annko",
+        "axnko",
+        "anco",
+        "annco",
+        "axnco",
+      ]
+    );
+
+    expect(patternsStringList).toEqual(expected);
+  });
+
+  it("ちゃんと", () => {
+
+    const [ patternsStringList, expected ] = makeTestCases(
+      "ちゃんと",
+      [
+        "chanto",
+        "channto",
+        "chaxnto",
+        "tyanto",
+        "tyannto",
+        "tyaxnto",
+        "cyanto",
+        "cyannto",
+        "cyaxnto",
+        "tilyanto",
+        "tilyannto",
+        "tilyaxnto",
+        "chilyanto",
+        "chilyannto",
+        "chilyaxnto",
+        "tixyanto",
+        "tixyannto",
+        "tixyaxnto",
+        "chixyanto",
+        "chixyannto",
+        "chixyaxnto",
+      ]
+    );
+
+    expect(patternsStringList).toEqual(expected);
+  });
+
+  it("あっと", () => {
+    const [ patternsStringList, expected ] = makeTestCases("あっと", [ "atto" ]);
+    expect(patternsStringList).toEqual(expected);
+  });
+
+  it("だっっさ", () => {
+    const [ patternsStringList, expected ] = makeTestCases("だっっさ", [ "dasssa" ]);
+    expect(patternsStringList).toEqual(expected);
+  });
+
+  it("らっきょ", () => {
+    const [ patternsStringList, expected ] = makeTestCases(
+      "らっきょ",
+      [
+        "rakkyo",
+        "rakkilyo",
+        "rakkixyo",
+      ]
+    );
+
+    expect(patternsStringList).toEqual(expected);
   });
 });
 

@@ -7,7 +7,7 @@ export default function Home() {
 			<Playground />
 
 			<div className="mockup-code">
-				<pre><code>{createInputPatterns("ちゃんと")}</code></pre>
+				<pre><code>{createInputPatterns("らっきょ")}</code></pre>
 			</div>
 		</div>
 	);

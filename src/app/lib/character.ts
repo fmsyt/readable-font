@@ -37,11 +37,18 @@ type InputPattern = string[];
 export function createInputPatterns(text: string) {
   const t = katakanaToHiragana(text);
 
+  let carryっ = 0;
+
   const result: InputPattern[] = [[]];
 
   for (let i = 0; i < text.length; i++) {
 
     const char = t[i];
+    if (char === "っ") {
+      carryっ++;
+      continue;
+    }
+
     const nextChar = t[i + 1];
 
     const p1 = KeyInputMap.get(char);
@@ -51,6 +58,10 @@ export function createInputPatterns(text: string) {
 
     const insertPatternsList: InputPattern[][] = [];
 
+
+    if (carryっ && Vowel.includes(char)) {
+      throw new Error("'っ' の後に母音が来ることはありません。");
+    }
 
     if (!ContractedSound.includes(nextChar)) {
 
@@ -76,6 +87,20 @@ export function createInputPatterns(text: string) {
       }
 
       i++;
+    }
+
+    if (carryっ) {
+
+      for (const patterns of insertPatternsList) {
+        const firstString = patterns[0][0];
+        const firstChar = firstString[0];
+
+        // carry の数だけfirstCharを重ねる
+        const prepend = Array(carryっ).fill(firstChar).join("");
+        patterns[0][0] = prepend + firstString;
+      }
+
+      carryっ = 0;
     }
 
     // const appendCount = insertPatternsList.reduce((acc, cur) => acc + Math.max(...cur.map(p => p.length)), 0);

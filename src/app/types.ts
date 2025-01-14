@@ -8,7 +8,7 @@ export const ContractedSound = [
   "ぁ", "ぃ", "ぅ", "ぇ", "ぉ",
   "ゃ", "ゅ", "ょ",
   "ゎ",
-  "っ"
+  // "っ"
 ];
 export type 拗音 = typeof ContractedSound[number];
 export type ContractedSound = 拗音;
