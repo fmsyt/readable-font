@@ -7,7 +7,7 @@ export default function Home() {
 			<Playground />
 
 			<div className="mockup-code">
-				<pre><code>{JSON.stringify(createInputPatterns("ちゃんと"), null, 4)}</code></pre>
+				<pre><code>{createInputPatterns("ちゃんと")}</code></pre>
 			</div>
 		</div>
 	);

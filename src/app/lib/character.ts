@@ -66,17 +66,24 @@ export function createInputPatterns(text: string) {
       const p3 = KeyInputMap.get(char + nextChar);
 
       if (p3) {
+        // "ちゃ"
         insertPatternsList.push([p3]);
       }
 
       if (p2) {
+        // "ち", "ゃ"
         insertPatternsList.push([p1, p2]);
       }
 
       i++;
     }
 
-    const appendCount = insertPatternsList.reduce((acc, cur) => acc + Math.max(...cur.map(p => p.length)), 0);
+    // const appendCount = insertPatternsList.reduce((acc, cur) => acc + Math.max(...cur.map(p => p.length)), 0);
+    const appendCount = insertPatternsList.reduce((acc, cur) => {
+      const combinationCount = cur.reduce((acc, cur) => acc * cur.length, 1);
+      return acc + combinationCount;
+    }, 0);
+
     if (appendCount > 1) {
       const copy = JSON.stringify(result);
       for (let j = 0; j < appendCount - 1; j++) {
@@ -87,31 +94,32 @@ export function createInputPatterns(text: string) {
 
     const combinationList: InputPattern[] = [];
     for (const patterns of insertPatternsList) {
-
-      const maxSize = Math.max(...patterns.map(p => p.length));
-
-      for (let j = 0; j < maxSize; j++) {
-
-        const list: InputPattern = [];
-
-        for (let k = 0; k < patterns.length; k++) {
-          const pattern = patterns[k];
-          if (!pattern) {
-            continue;
-          }
-
-          list.push(pattern[j % pattern.length]);
-        }
-
-        combinationList.push(list);
-
-      }
-
+      combinationList.push(...expandPatterns(patterns));
     }
 
     for (let j = 0; j < result.length; j++) {
       const p = combinationList[j % combinationList.length];
       result[j].push(...p);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Expand patterns list.
+ * ex) [[a, b], [c, d]] => [[a, c], [a, d], [b, c], [b, d]]
+ */
+export function expandPatterns<T>(patternsList: T[][]): T[][] {
+  if (patternsList.length === 0) return [[]];
+
+  const [first, ...rest] = patternsList;
+  const restExpanded = expandPatterns(rest);
+
+  const result: T[][] = [];
+  for (const item of first) {
+    for (const expanded of restExpanded) {
+      result.push([item, ...expanded]);
     }
   }
 

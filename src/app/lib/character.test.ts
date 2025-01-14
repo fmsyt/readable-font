@@ -1,4 +1,4 @@
-import { createInputPatterns } from "./character";
+import { createInputPatterns, expandPatterns } from "./character";
 
 describe("Text", () => {
   it("ちゃんと", () => {
@@ -28,5 +28,20 @@ describe("Text", () => {
       "chixyannto",
       "chixyaxnto",
     ].sort());
+  });
+});
+
+describe("expandPatterns", () => {
+  it("should expand patterns correctly", () => {
+    const patternsList = [["a", "b"], ["c", "d"]];
+    const expanded = expandPatterns(patternsList);
+    const expected = [
+      ["a", "c"],
+      ["a", "d"],
+      ["b", "c"],
+      ["b", "d"],
+    ];
+
+    expect(expanded).toEqual(expected);
   });
 });
