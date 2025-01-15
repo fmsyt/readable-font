@@ -35,15 +35,17 @@ export const KeyInputMap = (() => {
   return map;
 })();
 
-type InputTree = {
-  children: CharacterNode[];
+
+type Node = {
+  children: Node[];
 }
 
-type CharacterNode = {
+type InputTree = Node;
+
+type CharacterNode = Node & {
   char: string;
   patterns: InputPatterns;
-  parents: CharacterNode[] | null;
-  children: CharacterNode[];
+  parents: Node[] | null;
 }
 
 type InputPatterns = string[];
@@ -59,8 +61,8 @@ export function createInputPatternTree(text: string) {
     children: [],
   }
 
-  let lastTailNodes: CharacterNode[] = [];
-  let tailNodes: CharacterNode[] = [];
+  let lastTailNodes: Node[] = [];
+  let tailNodes: Node[] = [tree];
 
   for (let i = 0; i < text.length; i++) {
 
@@ -113,7 +115,7 @@ export function createInputPatternTree(text: string) {
         insertPatternsList.push([[...p3]]);
 
         const node: CharacterNode = {
-          char,
+          char: char + nextChar,
           patterns: [...p3],
           parents: lastTailNodes,
           children: [],
@@ -143,6 +145,8 @@ export function createInputPatternTree(text: string) {
           parents: [item1],
           children: [],
         }
+
+        item1.children.push(item2);
 
         for (const parent of lastTailNodes) {
           parent.children.push(item1);

@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { createInputPatterns } from "../lib/character";
+import { useEffect, useMemo, useState } from "react";
+import { createInputPatterns, createInputPatternTree } from "../lib/character";
 
 export default function Playground() {
 
@@ -11,6 +11,10 @@ export default function Playground() {
     const data = createInputPatterns(text);
     return data.map((patterns) => patterns.join(""));
   }, [text]);
+
+  useEffect(() => {
+    console.dir(createInputPatternTree("ちゃんと"));
+  }, [])
 
   return (
     <div className="w-full max-w-96">
