@@ -35,25 +35,32 @@ export const KeyInputMap = (() => {
   return map;
 })();
 
+type InputTree = {
+  children: CharacterNode[];
+}
 
-type InputPattern = string[];
+type CharacterNode = {
+  char: string;
+  patterns: InputPatterns;
+  parents: CharacterNode[] | null;
+  children: CharacterNode[];
+}
+
+type InputPatterns = string[];
 
 
-/**
- * ex) パンツ
- *
- * ```
- * [
- *    ["pa", "nn", "tu"],
- *    ["pa", "nn", "tsu"],
- * ]
- */
-export function createInputPatterns(text: string) {
+
+export function createInputPatternTree(text: string) {
   const t = katakanaToHiragana(text);
 
   let carryっ = 0;
 
-  const result: InputPattern[] = [[]];
+  const tree: InputTree = {
+    children: [],
+  }
+
+  let lastTailNodes: CharacterNode[] = [];
+  let tailNodes: CharacterNode[] = [];
 
   for (let i = 0; i < text.length; i++) {
 
@@ -70,7 +77,137 @@ export function createInputPatterns(text: string) {
       continue;
     }
 
-    const insertPatternsList: InputPattern[][] = [];
+    const insertPatternsList: InputPatterns[][] = [];
+
+    lastTailNodes = tailNodes;
+    tailNodes = [];
+
+
+    if (carryっ && Vowel.includes(char)) {
+      throw new Error("'っ' の後に母音が来ることはありません。");
+    }
+
+    if (!ContractedSound.includes(nextChar)) {
+
+      const node: CharacterNode = {
+        char,
+        patterns: char === "ん" && !Vowel.includes(nextChar) ? ["n", ...p1] : [...p1],
+        parents: lastTailNodes,
+        children: [],
+      }
+
+      for (const parent of lastTailNodes) {
+        parent.children.push(node);
+      }
+
+      insertPatternsList.push([node.patterns]);
+      tailNodes.push(node);
+
+    } else {
+
+      const p2 = KeyInputMap.get(nextChar);
+      const p3 = KeyInputMap.get(char + nextChar);
+
+      if (p3) {
+        // "ちゃ"
+        insertPatternsList.push([[...p3]]);
+
+        const node: CharacterNode = {
+          char,
+          patterns: [...p3],
+          parents: lastTailNodes,
+          children: [],
+        }
+
+        tailNodes.push(node);
+
+        for (const parent of lastTailNodes) {
+          parent.children.push(node);
+        }
+      }
+
+      if (p2) {
+        // "ち", "ゃ"
+        insertPatternsList.push([[...p1], [...p2]]);
+
+        const item1: CharacterNode = {
+          char,
+          patterns: [...p1],
+          parents: lastTailNodes,
+          children: [],
+        }
+
+        const item2: CharacterNode = {
+          char: nextChar,
+          patterns: [...p2],
+          parents: [item1],
+          children: [],
+        }
+
+        for (const parent of lastTailNodes) {
+          parent.children.push(item1);
+        }
+
+        tailNodes.push(item2);
+      }
+
+      i++;
+    }
+
+    if (carryっ) {
+
+      // TODO
+
+      // for (const patterns of insertPatternsList) {
+      //   const firstString = patterns[0][0];
+      //   const firstChar = firstString[0];
+
+      //   // carry の数だけfirstCharを重ねる
+      //   const prepend = Array(carryっ).fill(firstChar).join("");
+      //   patterns[0][0] = prepend + firstString;
+      // }
+
+      carryっ = 0;
+    }
+
+  }
+
+  return tree;
+}
+
+
+/**
+ * ex) パンツ
+ *
+ * ```
+ * [
+ *    ["pa", "nn", "tu"],
+ *    ["pa", "nn", "tsu"],
+ * ]
+ */
+export function createInputPatterns(text: string) {
+  const t = katakanaToHiragana(text);
+
+  let carryっ = 0;
+
+  const result: InputPatterns[] = [[]];
+
+  for (let i = 0; i < text.length; i++) {
+
+    const char = t[i];
+    if (char === "っ") {
+      carryっ++;
+      continue;
+    }
+
+    const nextChar = t[i + 1];
+
+    const p1 = KeyInputMap.get(char);
+    if (!p1) {
+      continue;
+    }
+
+    const insertPatternsList: InputPatterns[][] = [];
 
 
     if (carryっ && Vowel.includes(char)) {
@@ -131,7 +268,7 @@ export function createInputPatterns(text: string) {
     }
 
 
-    const combinationList: InputPattern[] = [];
+    const combinationList: InputPatterns[] = [];
     for (const patterns of insertPatternsList) {
       combinationList.push(...expandPatterns(patterns));
     }
