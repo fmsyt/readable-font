@@ -37,7 +37,7 @@ export const KeyInputMap = (() => {
 
 
 type Node = {
-  children: Node[];
+  children: CharacterNode[];
 }
 
 type InputTree = Node;
@@ -45,7 +45,7 @@ type InputTree = Node;
 type CharacterNode = Node & {
   char: string;
   patterns: InputPatterns;
-  parents: Node[] | null;
+  parents: CharacterNode[] | null;
 }
 
 type InputPatterns = string[];
@@ -61,8 +61,8 @@ export function createInputPatternTree(text: string) {
     children: [],
   }
 
-  let lastTailNodes: Node[] = [];
-  let tailNodes: Node[] = [tree];
+  let lastTailNodes: CharacterNode[] = [];
+  let tailNodes: CharacterNode[] = [tree as CharacterNode];
 
   for (let i = 0; i < text.length; i++) {
 
@@ -160,16 +160,15 @@ export function createInputPatternTree(text: string) {
 
     if (carryっ) {
 
-      // TODO
+      for (const tail of tailNodes) {
+        const firstString = tail.patterns[0];
+        const firstChar = firstString[0];
 
-      // for (const patterns of insertPatternsList) {
-      //   const firstString = patterns[0][0];
-      //   const firstChar = firstString[0];
-
-      //   // carry の数だけfirstCharを重ねる
-      //   const prepend = Array(carryっ).fill(firstChar).join("");
-      //   patterns[0][0] = prepend + firstString;
-      // }
+        // carry の数だけfirstCharを重ねる
+        const prependString = Array(carryっ).fill(firstChar).join("");
+        tail.patterns[0] = prependString + firstString;
+        tail.char = Array(carryっ).fill("っ").join("") + tail.char;
+      }
 
       carryっ = 0;
     }

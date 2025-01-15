@@ -13,8 +13,12 @@ export default function Playground() {
   }, [text]);
 
   useEffect(() => {
-    console.dir(createInputPatternTree("ちゃんと"));
-  }, [])
+    if (text.length === 0) {
+      return;
+    }
+
+    console.log(text, createInputPatternTree(text));
+  }, [text])
 
   return (
     <div className="w-full max-w-96">
