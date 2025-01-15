@@ -65,6 +65,7 @@ export function createInputPatternTree(text: string) {
 
   /** parentsに追加される対象を管理 */
   let tailNodes: CharacterNode[] = [tree as CharacterNode];
+  let appendっNodes: CharacterNode[] = [];
 
   for (let i = 0; i < text.length; i++) {
 
@@ -85,13 +86,13 @@ export function createInputPatternTree(text: string) {
 
     lastTailNodes = tailNodes;
     tailNodes = [];
+    appendっNodes = [];
 
 
     if (carryっ && Vowel.includes(char)) {
       throw new Error("'っ' の後に母音が来ることはありません。");
     }
 
-    let insertedNode: CharacterNode | null = null;
     if (!ContractedSound.includes(nextChar)) {
 
       const node: CharacterNode = {
@@ -107,7 +108,7 @@ export function createInputPatternTree(text: string) {
 
       insertPatternsList.push([node.patterns]);
 
-      insertedNode = node;
+      appendっNodes.push(node);
       tailNodes.push(node);
 
     } else {
@@ -130,7 +131,7 @@ export function createInputPatternTree(text: string) {
           parent.children.push(node);
         }
 
-        insertedNode = node;
+        appendっNodes.push(node);
         tailNodes.push(node);
       }
 
@@ -158,21 +159,25 @@ export function createInputPatternTree(text: string) {
           parent.children.push(item1);
         }
 
-        insertedNode = item1;
+        appendっNodes.push(item1);
         tailNodes.push(item2);
       }
 
       i++;
     }
 
-    if (carryっ && insertedNode) {
-      const firstString = insertedNode.patterns[0];
-      const firstChar = firstString[0];
+    if (carryっ) {
 
-      // carry の数だけfirstCharを重ねる
-      const prependString = Array(carryっ).fill(firstChar).join("");
-      insertedNode.patterns[0] = prependString + firstString;
-      insertedNode.char = Array(carryっ).fill("っ").join("") + insertedNode.char;
+      for (const node of appendっNodes) {
+        const firstString = node.patterns[0];
+        const firstChar = firstString[0];
+
+        // carry の数だけfirstCharを重ねる
+        const prependString = Array(carryっ).fill(firstChar).join("");
+        node.patterns[0] = prependString + firstString;
+        node.char = Array(carryっ).fill("っ").join("") + node.char;
+      }
+
 
       carryっ = 0;
     }
