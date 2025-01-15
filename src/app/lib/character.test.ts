@@ -96,6 +96,27 @@ describe("Text", () => {
     expect(patternsStringList).toEqual(expected);
   });
 
+  it("あびゃびゃ", () => {
+    const [ patternsStringList, expected ] = makeTestCases(
+      "あびゃびゃ",
+      [
+        "abyabya",
+        "abyabilya",
+        "abyabixya",
+
+        "abilyabya",
+        "abilyabilya",
+        "abilyabixya",
+
+        "abixyabya",
+        "abixyabilya",
+        "abixyabixya",
+      ]
+    );
+
+    expect(patternsStringList).toEqual(expected);
+  })
+
   it("numbers", () => {
     // NOTE: '0' → '-' の順番で入力すると、'ー' が '－' になる
     const [ patternsStringList, expected ] = makeTestCases(
