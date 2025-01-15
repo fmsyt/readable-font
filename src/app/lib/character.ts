@@ -2,20 +2,20 @@ import { ContractedSound, KeyMap, SymbolMap, Vowel } from "../types";
 import katakanaToHiragana from "./toHiragana";
 
 export const KeyInputMap = (() => {
-  const map = new Map<string, string[]>();
+  const map = new Map<string, readonly string[]>();
 
   for (const [pattern, kana] of Object.entries(KeyMap)) {
     if (kana === null || kana === undefined) {
       continue;
     }
 
-    const item = map.get(kana);
-    if (!item) {
+    const current = map.get(kana);
+    if (!current) {
       map.set(kana, [pattern]);
       continue;
     }
 
-    item.push(pattern);
+    map.set(kana, [...current, pattern]);
   }
 
   for (const [pattern, kana] of Object.entries(SymbolMap)) {
@@ -23,13 +23,13 @@ export const KeyInputMap = (() => {
       continue;
     }
 
-    const item = map.get(kana);
-    if (!item) {
+    const current = map.get(kana);
+    if (!current) {
       map.set(kana, [pattern]);
       continue;
     }
 
-    item.push(pattern);
+    map.set(kana, [...current, pattern]);
   }
 
   return map;
@@ -82,7 +82,7 @@ export function createInputPatterns(text: string) {
       if (char === "ん" && !Vowel.includes(nextChar)) {
         insertPatternsList.push([["n", ...p1]]);
       } else {
-        insertPatternsList.push([p1]);
+        insertPatternsList.push([[...p1]]);
       }
 
     } else {
@@ -92,12 +92,12 @@ export function createInputPatterns(text: string) {
 
       if (p3) {
         // "ちゃ"
-        insertPatternsList.push([p3]);
+        insertPatternsList.push([[...p3]]);
       }
 
       if (p2) {
         // "ち", "ゃ"
-        insertPatternsList.push([p1, p2]);
+        insertPatternsList.push([[...p1], [...p2]]);
       }
 
       i++;
