@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { createInputPatterns } from "../lib/character";
 
 export default function Playground() {
@@ -25,11 +25,15 @@ export default function Playground() {
 
       <div className="mt-4">
         <ul>
-          {combination.map((pattern, index) => (
-            <li key={index}>{pattern}</li>
+          {combination.map((pattern) => (
+            <li key={pattern}>{pattern}</li>
           ))}
         </ul>
       </div>
+
+			<div className="mt-4 mockup-code max-h-96 overflow-y-auto">
+				<pre><code>{JSON.stringify(createInputPatterns(text), null, 2)}</code></pre>
+			</div>
     </div>
   );
 }
