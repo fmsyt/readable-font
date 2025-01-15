@@ -39,8 +39,11 @@ export default function Playground() {
         </ul>
       </div>
 
-			<div className="mt-4 mockup-code max-h-96 overflow-y-auto">
+			{/* <div className="mt-4 mockup-code max-h-96 overflow-y-auto">
 				<pre><code>{JSON.stringify(createInputPatterns(text), null, 2)}</code></pre>
+			</div> */}
+			<div className="mt-4 mockup-code max-h-96 overflow-y-auto">
+				<pre><code>{JSON.stringify(createInputPatterns("あんこ"), null, 2)}</code></pre>
 			</div>
     </div>
   );

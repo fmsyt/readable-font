@@ -1,4 +1,4 @@
-import { createInputPatterns, expandPatterns } from "./character";
+import { createInputPatterns } from "./character";
 
 describe("Text", () => {
 
@@ -140,20 +140,5 @@ describe("Text", () => {
     );
 
     expect(patternsStringList).toEqual(expected);
-  });
-});
-
-describe("expandPatterns", () => {
-  it("should expand patterns correctly", () => {
-    const patternsList = [["a", "b"], ["c", "d"]];
-    const expanded = expandPatterns(patternsList);
-    const expected = [
-      ["a", "c"],
-      ["a", "d"],
-      ["b", "c"],
-      ["b", "d"],
-    ];
-
-    expect(expanded).toEqual(expected);
   });
 });

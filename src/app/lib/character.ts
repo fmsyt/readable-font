@@ -62,6 +62,8 @@ export function createInputPatternTree(text: string) {
   }
 
   let lastTailNodes: CharacterNode[] = [];
+
+  /** parentsに追加される対象を管理 */
   let tailNodes: CharacterNode[] = [tree as CharacterNode];
 
   for (let i = 0; i < text.length; i++) {
@@ -89,6 +91,7 @@ export function createInputPatternTree(text: string) {
       throw new Error("'っ' の後に母音が来ることはありません。");
     }
 
+    let insertedNode: CharacterNode | null = null;
     if (!ContractedSound.includes(nextChar)) {
 
       const node: CharacterNode = {
@@ -103,6 +106,8 @@ export function createInputPatternTree(text: string) {
       }
 
       insertPatternsList.push([node.patterns]);
+
+      insertedNode = node;
       tailNodes.push(node);
 
     } else {
@@ -121,11 +126,12 @@ export function createInputPatternTree(text: string) {
           children: [],
         }
 
-        tailNodes.push(node);
-
         for (const parent of lastTailNodes) {
           parent.children.push(node);
         }
+
+        insertedNode = node;
+        tailNodes.push(node);
       }
 
       if (p2) {
@@ -152,23 +158,21 @@ export function createInputPatternTree(text: string) {
           parent.children.push(item1);
         }
 
+        insertedNode = item1;
         tailNodes.push(item2);
       }
 
       i++;
     }
 
-    if (carryっ) {
+    if (carryっ && insertedNode) {
+      const firstString = insertedNode.patterns[0];
+      const firstChar = firstString[0];
 
-      for (const tail of tailNodes) {
-        const firstString = tail.patterns[0];
-        const firstChar = firstString[0];
-
-        // carry の数だけfirstCharを重ねる
-        const prependString = Array(carryっ).fill(firstChar).join("");
-        tail.patterns[0] = prependString + firstString;
-        tail.char = Array(carryっ).fill("っ").join("") + tail.char;
-      }
+      // carry の数だけfirstCharを重ねる
+      const prependString = Array(carryっ).fill(firstChar).join("");
+      insertedNode.patterns[0] = prependString + firstString;
+      insertedNode.char = Array(carryっ).fill("っ").join("") + insertedNode.char;
 
       carryっ = 0;
     }
@@ -178,128 +182,30 @@ export function createInputPatternTree(text: string) {
   return tree;
 }
 
+export function createInputPatterns(text: string): InputPatterns[] {
+  const tree = createInputPatternTree(text);
 
-/**
- * ex) パンツ
- *
- * ```
- * [
- *    ["pa", "nn", "tu"],
- *    ["pa", "nn", "tsu"],
- * ]
- */
-export function createInputPatterns(text: string) {
-  const t = katakanaToHiragana(text);
+  function traverse(node: CharacterNode, carry: InputPatterns = []) {
+    // const carryList = node.patterns.map(p => carry + p);
+    const carryList = node.patterns.map((p) => [...carry, p]);
 
-  let carryっ = 0;
-
-  const result: InputPatterns[] = [[]];
-
-  for (let i = 0; i < text.length; i++) {
-
-    const char = t[i];
-    if (char === "っ") {
-      carryっ++;
-      continue;
+    if (node.children.length === 0) {
+      return carryList;
     }
 
-    const nextChar = t[i + 1];
-
-    const p1 = KeyInputMap.get(char);
-    if (!p1) {
-      continue;
-    }
-
-    const insertPatternsList: InputPatterns[][] = [];
-
-
-    if (carryっ && Vowel.includes(char)) {
-      throw new Error("'っ' の後に母音が来ることはありません。");
-    }
-
-    if (!ContractedSound.includes(nextChar)) {
-
-      if (char === "ん" && !Vowel.includes(nextChar)) {
-        insertPatternsList.push([["n", ...p1]]);
-      } else {
-        insertPatternsList.push([[...p1]]);
-      }
-
-    } else {
-
-      const p2 = KeyInputMap.get(nextChar);
-      const p3 = KeyInputMap.get(char + nextChar);
-
-      if (p3) {
-        // "ちゃ"
-        insertPatternsList.push([[...p3]]);
-      }
-
-      if (p2) {
-        // "ち", "ゃ"
-        insertPatternsList.push([[...p1], [...p2]]);
-      }
-
-      i++;
-    }
-
-    if (carryっ) {
-
-      for (const patterns of insertPatternsList) {
-        const firstString = patterns[0][0];
-        const firstChar = firstString[0];
-
-        // carry の数だけfirstCharを重ねる
-        const prepend = Array(carryっ).fill(firstChar).join("");
-        patterns[0][0] = prepend + firstString;
-      }
-
-      carryっ = 0;
-    }
-
-    // const appendCount = insertPatternsList.reduce((acc, cur) => acc + Math.max(...cur.map(p => p.length)), 0);
-    const appendCount = insertPatternsList.reduce((acc, cur) => {
-      const combinationCount = cur.reduce((acc, cur) => acc * cur.length, 1);
-      return acc + combinationCount;
-    }, 0);
-
-    if (appendCount > 1) {
-      const copy = JSON.stringify(result);
-      for (let j = 0; j < appendCount - 1; j++) {
-        result.push(...JSON.parse(copy));
+    let result: InputPatterns[] = [];
+    for (const child of node.children) {
+      for (const carry of carryList) {
+        result.push(...traverse(child, carry));
       }
     }
 
-
-    const combinationList: InputPatterns[] = [];
-    for (const patterns of insertPatternsList) {
-      combinationList.push(...expandPatterns(patterns));
-    }
-
-    for (let j = 0; j < result.length; j++) {
-      const p = combinationList[j % combinationList.length];
-      result[j].push(...p);
-    }
+    return result;
   }
 
-  return result;
-}
-
-/**
- * Expand patterns list.
- * ex) [[a, b], [c, d]] => [[a, c], [a, d], [b, c], [b, d]]
- */
-export function expandPatterns<T>(patternsList: T[][]): T[][] {
-  if (patternsList.length === 0) return [[]];
-
-  const [first, ...rest] = patternsList;
-  const restExpanded = expandPatterns(rest);
-
-  const result: T[][] = [];
-  for (const item of first) {
-    for (const expanded of restExpanded) {
-      result.push([item, ...expanded]);
-    }
+  const result: InputPatterns[] = [];
+  for (const child of tree.children) {
+    result.push(...traverse(child));
   }
 
   return result;
