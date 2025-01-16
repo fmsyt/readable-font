@@ -1,6 +1,9 @@
 import { ContractedSound, KeyMap, SymbolMap, Vowel } from "../types";
 import katakanaToHiragana from "./toHiragana";
 
+/**
+ * 入力パターンマップ
+ */
 export const KeyInputMap = (() => {
   const map = new Map<string, readonly string[]>();
 
@@ -36,23 +39,55 @@ export const KeyInputMap = (() => {
 })();
 
 
-type Node = {
+export type InputTree = {
+  /**
+   * 子ノードへのポインタ
+   */
   children: CharacterNode[];
 }
 
-type InputTree = Node;
-
-type CharacterNode = Node & {
+export type CharacterNode = InputTree & {
+  /**
+   * 書きたいひらがな
+   *
+   * ex)
+   * - あ
+   * - ちゃ
+   * - っこ
+   */
   char: string;
-  patterns: InputPatterns;
-  parents: CharacterNode[] | null;
+
+  /**
+   * 入力パターン
+   *
+   * ex)
+   * - cha
+   * - tya
+   * - tilya
+   * - tixya
+   */
+  patterns: string[];
+
+  /**
+   * 親ノードへのポインタ
+   */
+  parents: CharacterNode[];
 }
 
-type InputPatterns = string[];
+type InputPatterns = CharacterNode["patterns"];
 
 
 
-export function createInputPatternTree(text: string) {
+/**
+ * 入力パターンをツリー構造に変換する
+ *
+ * ex) "ちゃんと"
+ * ```plain
+ * (root) ----- [cha, tya, cya] ----- [n, nn, xn] - [to]
+ *        \ [chi, ti] - [lya, xya] /
+ * ```
+ */
+export function createInputTree(text: string) {
   const t = katakanaToHiragana(text);
 
   let carryっ = 0;
@@ -187,8 +222,23 @@ export function createInputPatternTree(text: string) {
   return tree;
 }
 
+/**
+ * 入力パターンを全て生成する
+ *
+ * ex) "あんこ"
+ * ```
+ * return [
+ *   ["a", "n", "ko"],
+ *   ["a", "nn", "ko"],
+ *   ["a", "xn", "ko"],
+ *   ["a", "n", "co"],
+ *   ["a", "nn", "co"],
+ *   ["a", "xn", "co"],
+ * ];
+ * ```
+ */
 export function createInputPatterns(text: string): InputPatterns[] {
-  const tree = createInputPatternTree(text);
+  const tree = createInputTree(text);
 
   function traverse(node: CharacterNode, carry: InputPatterns = []) {
     // const carryList = node.patterns.map(p => carry + p);

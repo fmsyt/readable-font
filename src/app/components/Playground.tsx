@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { createInputPatterns, createInputPatternTree } from "../lib/character";
+import { createInputPatterns, createInputTree } from "../lib/character";
 
 export default function Playground() {
 
@@ -17,7 +17,7 @@ export default function Playground() {
       return;
     }
 
-    console.log(text, createInputPatternTree(text));
+    console.log(text, createInputTree(text));
   }, [text])
 
   return (
