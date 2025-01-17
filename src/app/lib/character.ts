@@ -248,7 +248,7 @@ export function createInputPatterns(text: string): InputPatterns[] {
       return carryList;
     }
 
-    let result: InputPatterns[] = [];
+    const result: InputPatterns[] = [];
     for (const child of node.children) {
       for (const carry of carryList) {
         result.push(...traverse(child, carry));
