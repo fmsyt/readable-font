@@ -35,7 +35,7 @@ export default function Playground() {
 
     const game = new Game({
       sentences,
-      playgroundElement: playgroundRef.current as EventTarget,
+      playgroundElement: globalThis,
       maxSectionCount: sentences.length,
       onInput: ({ remained }) => {
         setRemind(remained);
