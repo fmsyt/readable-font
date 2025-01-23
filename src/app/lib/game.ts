@@ -256,7 +256,9 @@ class Section {
     }
 
     this.kana = kana;
-    this.patterns = createInputPatterns(kana).map((pattern) => pattern.join(""));
+    this.patterns = createInputPatterns(kana)
+      .map((pattern) => pattern.join(""))
+      .sort((a, b) => a.length - b.length);
 
     this.typedStateHistory = kana.split("").map((char) => ({
       char,
