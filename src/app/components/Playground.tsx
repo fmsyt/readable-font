@@ -1,27 +1,64 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { createInputPatterns, createInputTree } from "../lib/character";
+import { useEffect, useRef, useState } from "react";
+import { createInputPatterns } from "../lib/character";
+import { Game, type Remined, type Sentence } from "../lib/game";
+
+const sentences: Sentence[] = [
+  {
+    id: 1,
+    original: "隣の客はよく柿食う客だ",
+    // kana: "となりのきゃくはよくかきくうきゃくだ",
+    kana: createInputPatterns("となりのきゃくはよくかきくうきゃくだ")[0].join(""),
+  },
+];
 
 export default function Playground() {
 
+  const playgroundRef = useRef<HTMLDivElement | null>(null);
+
   const [text, setText] = useState("");
 
-  const combination = useMemo(() => {
-    const data = createInputPatterns(text);
-    return data.map((patterns) => patterns.join(""));
-  }, [text]);
+  const [remind, setRemind] = useState<Remined | null>(null);
+  const gameRef = useRef<Game | null>(null);
 
   useEffect(() => {
-    if (text.length === 0) {
+
+    if (!playgroundRef.current) {
       return;
     }
 
-    console.log(text, createInputTree(text));
-  }, [text])
+    console.log(playgroundRef.current);
+
+    const game = new Game({
+      sentences,
+      playgroundElement: playgroundRef.current as EventTarget,
+      maxSectionCount: sentences.length,
+      onInput: ({ remained }) => {
+        setRemind(remained);
+      },
+      onStart: () => {
+        console.log("start");
+      },
+      onFinished: (score) => {
+        console.log("finished", score);
+      }
+    });
+
+    game.start();
+
+    gameRef.current = game;
+    setRemind(game.remained());
+
+    return () => {
+      game.destroy();
+    }
+
+  }, [])
+
 
   return (
-    <div className="w-full max-w-96">
+    <div ref={playgroundRef} className="w-full max-w-96">
       <h1>Game</h1>
       <input
         type="text"
@@ -30,20 +67,8 @@ export default function Playground() {
         placeholder="Type here..."
         className="w-full p-2 mt-2 border border-gray-300 rounded-md"
       />
-
-      <div className="mt-4">
-        <ul>
-          {combination.map((pattern) => (
-            <li key={pattern}>{pattern}</li>
-          ))}
-        </ul>
-      </div>
-
-			{/* <div className="mt-4 mockup-code max-h-96 overflow-y-auto">
-				<pre><code>{JSON.stringify(createInputPatterns(text), null, 2)}</code></pre>
-			</div> */}
 			<div className="mt-4 mockup-code max-h-96 overflow-y-auto">
-				<pre><code>{JSON.stringify(createInputPatterns("あんこ"), null, 2)}</code></pre>
+				<pre><code>{JSON.stringify(remind, null, 2)}</code></pre>
 			</div>
     </div>
   );

@@ -1,59 +1,13 @@
-import { type InputTree, createInputTree } from "./character";
-
-export function initGame(text: string) {
-  let tree: InputTree | null = createInputTree(text);
-  let isActive = true;
-
-  const handleInput = (input: string) => {
-    if (!isActive) {
-      throw new Error("Game is not active");
-    }
-    console.log(input);
-    return 1;
-  }
-
-  const handleQuit = () => {
-    isActive = false;
-    tree = null;
-  }
-
-  return {
-    handleInput,
-    handleQuit,
-  }
-}
-
-interface Sentence {
+export interface Sentence {
   id: number;
-  text: string;
+  original: string;
+  kana: string;
 }
 
-const disabled_keys = ["F12"];
+export const disabled_keys = ["F12"];
 
 type MetaKeys = Pick<KeyboardEvent, "ctrlKey" | "shiftKey" | "altKey" | "metaKey">;
 
-export const sentences: Sentence[] = [
-  {
-    id: 1,
-    text: "The quick brown fox jumps over the lazy dog.",
-  },
-  {
-    id: 2,
-    text: "The five boxing wizards jump quickly.",
-  },
-  {
-    id: 3,
-    text: "How razorback-jumping frogs can level six piqued gymnasts!",
-  },
-  {
-    id: 4,
-    text: "Pack my box with five dozen liquor jugs.",
-  },
-  {
-    id: 5,
-    text: "The quick onyx goblin jumps over the lazy dwarf.",
-  },
-];
 
 export type OnInputHandlerParam = {
   char: string;
@@ -66,6 +20,7 @@ export type OnFinishedHandler = (score: Score) => void;
 export type GameConstructorParam = {
   sentences: Sentence[];
   maxSectionCount?: number;
+  playgroundElement: EventTarget;
   onInput?: OnInputHandler;
   onStart?: OnStartHandler;
   onFinished?: OnFinishedHandler;
@@ -83,9 +38,19 @@ export class Game {
   handleStart: OnStartHandler = () => { };
   handleFinished: OnFinishedHandler = () => { };
 
-  constructor(param: GameConstructorParam) {
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  events: Map<EventTarget, (...args) => any> = new Map();
 
+  constructor(param: GameConstructorParam) {
     const { sentences, maxSectionCount = 5 } = param;
+
+    this.isStarted = this.isStarted.bind(this);
+    this.isFinished = this.isFinished.bind(this);
+    this.destroy = this.destroy.bind(this);
+    this.getScore = this.getScore.bind(this);
+    this.type = this.type.bind(this);
+    this.start = this.start.bind(this);
+    this.remained = this.remained.bind(this);
 
     if (param.onInput) {
       this.handleInput = param.onInput;
@@ -108,7 +73,7 @@ export class Game {
       throw new Error("sentences is empty");
     }
 
-    if (sentences.some((sentence) => sentence.text === "")) {
+    if (sentences.some((sentence) => sentence.kana === "")) {
       throw new Error("sentence text is empty");
     }
 
@@ -116,14 +81,51 @@ export class Game {
       throw new Error("maxSectionCount is less than 1");
     }
 
+    console.log(this)
+
     const pushedSectionIds: number[] = [];
     while (this.sections.length < maxSectionCount) {
       const randomSentence = sentences[Math.floor(Math.random() * sentences.length)];
       if (!pushedSectionIds.includes(randomSentence.id)) {
-        this.sections.push(new Section(randomSentence.text));
+        this.sections.push(new Section(randomSentence.kana));
         pushedSectionIds.push(randomSentence.id);
+
+        console.log(this.sections)
       }
     }
+
+    const onKeyDown: EventListenerOrEventListenerObject = (event) => {
+      const e = event as KeyboardEvent;
+      if (!this.isStarted()) {
+        return
+      }
+
+      const hit_key = e.key.toLowerCase();
+
+      console.log(hit_key)
+
+      if (disabled_keys.includes(hit_key)) {
+        return;
+      }
+
+      if (e.ctrlKey && e.key === "c") {
+        e.preventDefault();
+        return;
+      }
+
+      const metaKeys: MetaKeys = {
+        ctrlKey: e.ctrlKey,
+        shiftKey: e.shiftKey,
+        altKey: e.altKey,
+        metaKey: e.metaKey,
+      };
+
+      this.type(e.key, metaKeys);
+    }
+
+    param.playgroundElement.addEventListener("keydown", (e) => {
+      onKeyDown(e);
+    });
 
     this.state = "pending";
   }
@@ -133,6 +135,21 @@ export class Game {
     this.started_timestamp = Date.now();
 
     this.currentSectionIndex = 0;
+  }
+
+  destroy() {
+    this.state = "cancelled";
+    this.sections = [];
+    this.currentSectionIndex = null;
+    this.started_timestamp = null;
+
+    this.handleInput = () => { };
+    this.handleStart = () => { };
+    this.handleFinished = () => { };
+
+    this.events.forEach((handler, target) => {
+      target.removeEventListener("keydown", handler);
+    });
   }
 
   type(char: string, metaKeys: MetaKeys) {
@@ -211,33 +228,6 @@ export class Game {
       wpm,
       accuracy,
     };
-  }
-
-  onKeyDown(e: KeyboardEvent) {
-
-    if (!this.isStarted()) {
-      return
-    }
-
-    const hit_key = e.key.toLowerCase();
-
-    if (disabled_keys.includes(hit_key)) {
-      return;
-    }
-
-    if (e.ctrlKey && e.key === "c") {
-      e.preventDefault();
-      return;
-    }
-
-    const metaKeys: MetaKeys = {
-      ctrlKey: e.ctrlKey,
-      shiftKey: e.shiftKey,
-      altKey: e.altKey,
-      metaKey: e.metaKey,
-    };
-
-    this.type(e.key, metaKeys);
   }
 }
 
