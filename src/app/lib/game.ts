@@ -39,7 +39,7 @@ export class Game {
   handleFinished: OnFinishedHandler = () => { };
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  events: Map<EventTarget, (...args) => any> = new Map();
+  events: Map<EventTarget, (...args: any[]) => any> = new Map();
 
   constructor(param: GameConstructorParam) {
     const { sentences, maxSectionCount = 5 } = param;
