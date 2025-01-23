@@ -18,7 +18,7 @@ type MetaKeys = Pick<KeyboardEvent, "ctrlKey" | "shiftKey" | "altKey" | "metaKey
 export type OnInputHandlerParam = {
   char: string;
   metaKeys: MetaKeys;
-  remained: Remined;
+  remained: Remined | null;
 }
 export type OnInputHandler = (param: OnInputHandlerParam) => void;
 export type OnStartHandler = () => void;
@@ -191,12 +191,16 @@ export class Game {
     return true;
   }
 
-  remained(): Remined {
+  remained(): Remined | null {
     if (this.currentSectionIndex === null) {
       throw new Error("currentSectionIndex is null");
     }
 
     const currentSection = this.sections[this.currentSectionIndex];
+    if (!currentSection) {
+      return null;
+    }
+
     return currentSection.remined();
   }
 
