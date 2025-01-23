@@ -1,7 +1,13 @@
-export interface Sentence {
+import { createInputPatterns } from "./character";
+
+export type Sentence = {
   id: number;
   original: string;
   kana: string;
+}
+
+export type SentenceState = Sentence & {
+  ignored: boolean;
 }
 
 export const disabled_keys = ["F12"];
@@ -80,8 +86,6 @@ export class Game {
     if (maxSectionCount < 1) {
       throw new Error("maxSectionCount is less than 1");
     }
-
-    console.log(this)
 
     const pushedSectionIds: number[] = [];
     while (this.sections.length < maxSectionCount) {
@@ -233,57 +237,63 @@ export class Game {
 
 
 class Section {
-  sentence: string;
-  expectedCharIndex = 0;
+  kana: string;
 
+  patterns: string[] = [];
+  watchingPatternIndex = 0;
+
+  typedString = "";
   typedStateHistory: TypeState[] = [];
 
-  constructor(sentence: string) {
+  constructor(kana: string) {
 
-    if (sentence === "") {
+    if (kana === "") {
       throw new Error("sentence is empty");
     }
 
-    this.sentence = sentence;
-    this.typedStateHistory = sentence.split("").map((char) => ({
+    this.kana = kana;
+    this.patterns = createInputPatterns(kana).map((pattern) => pattern.join(""));
+
+    this.typedStateHistory = kana.split("").map((char) => ({
       char,
       missedChars: [],
     }));
-
-    this.expectedCharIndex = 0;
   }
 
-  type(char: string): boolean {
-    const expectedChar = this.sentence[this.expectedCharIndex];
+  type(inputChar: string): boolean {
 
     // exclude named key
-    if (char.length > 1) {
+    if (inputChar.length > 1) {
       return false;
     }
 
-    if (char === expectedChar) {
-      this.expectedCharIndex++;
-      return true;
+    const searchingPattern = `${this.typedString}${inputChar}`;
+    const matchedPatterns = this.patterns.filter((pattern) => pattern.startsWith(searchingPattern));
+
+    if (matchedPatterns.length === 0) {
+      return false;
     }
 
-    const currentTypedState = this.typedStateHistory[this.expectedCharIndex];
-    if (!currentTypedState.missedChars.includes(char)) {
-      currentTypedState.missedChars.push(char);
-    }
-
-    return false;
+    this.typedString += inputChar;
+    return true;
   }
 
   isSolved(): boolean {
-    return this.expectedCharIndex === this.sentence.length;
+    return this.patterns.some((pattern) => pattern === this.typedString);
   }
 
   remined(): Remined {
+
+    const searchingPattern = this.typedString;
+    const matchedPatterns = this.patterns.filter((pattern) => pattern.startsWith(searchingPattern));
+
+    const pattern = matchedPatterns.length > 0 ? matchedPatterns[0] : this.patterns[0];
+
     return {
-      currentChar: this.sentence[this.expectedCharIndex],
-      remainedStr: this.sentence.slice(this.expectedCharIndex + 1),
-      typedStr: this.sentence.slice(0, this.expectedCharIndex),
-    };
+      currentChar: pattern[this.typedString.length],
+      remainedStr: pattern.slice(this.typedString.length + 1),
+      typedStr: this.typedString,
+    }
   }
 }
 

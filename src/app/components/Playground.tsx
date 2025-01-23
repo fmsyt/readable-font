@@ -1,16 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { createInputPatterns } from "../lib/character";
 import { Game, type Remined, type Sentence } from "../lib/game";
 
 const sentences: Sentence[] = [
   {
     id: 1,
     original: "隣の客はよく柿食う客だ",
-    // kana: "となりのきゃくはよくかきくうきゃくだ",
-    kana: createInputPatterns("となりのきゃくはよくかきくうきゃくだ")[0].join(""),
+    kana: "となりのきゃくはよくかきくうきゃくだ",
+    // kana: createInputPatterns("となりのきゃくはよくかきくうきゃくだ")[0].join(""),
   },
+  {
+    id: 2,
+    original: "庭には二羽鶏がいる",
+    kana: "にわにはにわにわとりがいる",
+    // kana: createInputPatterns("にわにはにわにわとりがいる")[0].join(""),
+  }
 ];
 
 export default function Playground() {
