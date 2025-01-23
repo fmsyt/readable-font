@@ -15,11 +15,10 @@ const sentences: Sentence[] = [
     original: "庭には二羽鶏がいる",
     kana: "にわにはにわにわとりがいる",
     // kana: createInputPatterns("にわにはにわにわとりがいる")[0].join(""),
-  }
+  },
 ];
 
 export default function Playground() {
-
   const playgroundRef = useRef<HTMLDivElement | null>(null);
 
   const [text, setText] = useState("");
@@ -28,7 +27,6 @@ export default function Playground() {
   const gameRef = useRef<Game | null>(null);
 
   useEffect(() => {
-
     if (!playgroundRef.current) {
       return;
     }
@@ -47,7 +45,7 @@ export default function Playground() {
       },
       onFinished: (score) => {
         console.log("finished", score);
-      }
+      },
     });
 
     game.start();
@@ -57,10 +55,8 @@ export default function Playground() {
 
     return () => {
       game.destroy();
-    }
-
-  }, [])
-
+    };
+  }, []);
 
   return (
     <div ref={playgroundRef} className="w-full max-w-96">
@@ -72,9 +68,11 @@ export default function Playground() {
         placeholder="Type here..."
         className="w-full p-2 mt-2 border border-gray-300 rounded-md"
       />
-			<div className="mt-4 mockup-code max-h-96 overflow-y-auto">
-				<pre><code>{JSON.stringify(remind, null, 2)}</code></pre>
-			</div>
+      <div className="mt-4 mockup-code max-h-96 overflow-y-auto">
+        <pre>
+          <code>{JSON.stringify(remind, null, 2)}</code>
+        </pre>
+      </div>
     </div>
   );
 }

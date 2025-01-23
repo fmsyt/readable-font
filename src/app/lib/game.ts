@@ -4,22 +4,24 @@ export type Sentence = {
   id: number;
   original: string;
   kana: string;
-}
+};
 
 export type SentenceState = Sentence & {
   ignored: boolean;
-}
+};
 
 export const disabled_keys = ["F12"];
 
-type MetaKeys = Pick<KeyboardEvent, "ctrlKey" | "shiftKey" | "altKey" | "metaKey">;
-
+type MetaKeys = Pick<
+  KeyboardEvent,
+  "ctrlKey" | "shiftKey" | "altKey" | "metaKey"
+>;
 
 export type OnInputHandlerParam = {
   char: string;
   metaKeys: MetaKeys;
   remained: Remined | null;
-}
+};
 export type OnInputHandler = (param: OnInputHandlerParam) => void;
 export type OnStartHandler = () => void;
 export type OnFinishedHandler = (score: Score) => void;
@@ -30,19 +32,18 @@ export type GameConstructorParam = {
   onInput?: OnInputHandler;
   onStart?: OnStartHandler;
   onFinished?: OnFinishedHandler;
-}
+};
 
 export class Game {
-
   started_timestamp: number | null = null;
   state: GameState;
 
   sections: Section[] = [];
   currentSectionIndex: number | null = null;
 
-  handleInput: OnInputHandler = () => { };
-  handleStart: OnStartHandler = () => { };
-  handleFinished: OnFinishedHandler = () => { };
+  handleInput: OnInputHandler = () => {};
+  handleStart: OnStartHandler = () => {};
+  handleFinished: OnFinishedHandler = () => {};
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   events: Map<EventTarget, (...args: any[]) => any> = new Map();
@@ -70,7 +71,6 @@ export class Game {
       this.handleFinished = param.onFinished;
     }
 
-
     if (!Array.isArray(sentences)) {
       throw new Error("sentences is not an array");
     }
@@ -89,24 +89,25 @@ export class Game {
 
     const pushedSectionIds: number[] = [];
     while (this.sections.length < maxSectionCount) {
-      const randomSentence = sentences[Math.floor(Math.random() * sentences.length)];
+      const randomSentence =
+        sentences[Math.floor(Math.random() * sentences.length)];
       if (!pushedSectionIds.includes(randomSentence.id)) {
         this.sections.push(new Section(randomSentence.kana));
         pushedSectionIds.push(randomSentence.id);
 
-        console.log(this.sections)
+        console.log(this.sections);
       }
     }
 
     const onKeyDown: EventListenerOrEventListenerObject = (event) => {
       const e = event as KeyboardEvent;
       if (!this.isStarted()) {
-        return
+        return;
       }
 
       const hit_key = e.key.toLowerCase();
 
-      console.log(hit_key)
+      console.log(hit_key);
 
       if (disabled_keys.includes(hit_key)) {
         return;
@@ -125,7 +126,7 @@ export class Game {
       };
 
       this.type(e.key, metaKeys);
-    }
+    };
 
     param.playgroundElement.addEventListener("keydown", (e) => {
       onKeyDown(e);
@@ -147,9 +148,9 @@ export class Game {
     this.currentSectionIndex = null;
     this.started_timestamp = null;
 
-    this.handleInput = () => { };
-    this.handleStart = () => { };
-    this.handleFinished = () => { };
+    this.handleInput = () => {};
+    this.handleStart = () => {};
+    this.handleFinished = () => {};
 
     this.events.forEach((handler, target) => {
       target.removeEventListener("keydown", handler);
@@ -157,7 +158,6 @@ export class Game {
   }
 
   type(char: string, metaKeys: MetaKeys) {
-
     if (this.state !== "started") {
       throw new Error("Game is not started");
     }
@@ -220,13 +220,24 @@ export class Game {
     const time = Date.now() - this.started_timestamp;
     const history = this.sections.map((section) => section.typedStateHistory);
 
-    const totalCharCount = history.reduce((acc, sectionHistory) => acc + sectionHistory.length, 0);
+    const totalCharCount = history.reduce(
+      (acc, sectionHistory) => acc + sectionHistory.length,
+      0,
+    );
     const missedCharCount = history.reduce((acc, sectionHistory) => {
-      return acc + sectionHistory.reduce((acc, typeState) => acc + typeState.missedChars.length, 0);
+      return (
+        acc +
+        sectionHistory.reduce(
+          (acc, typeState) => acc + typeState.missedChars.length,
+          0,
+        )
+      );
     }, 0);
 
     const wpm = Math.floor(totalCharCount / 5 / (time / 1000 / 60));
-    const accuracy = Math.floor(((totalCharCount - missedCharCount) / totalCharCount) * 100);
+    const accuracy = Math.floor(
+      ((totalCharCount - missedCharCount) / totalCharCount) * 100,
+    );
 
     return {
       time,
@@ -239,7 +250,6 @@ export class Game {
   }
 }
 
-
 class Section {
   kana: string;
 
@@ -250,7 +260,6 @@ class Section {
   typedStateHistory: TypeState[] = [];
 
   constructor(kana: string) {
-
     if (kana === "") {
       throw new Error("sentence is empty");
     }
@@ -267,14 +276,15 @@ class Section {
   }
 
   type(inputChar: string): boolean {
-
     // exclude named key
     if (inputChar.length > 1) {
       return false;
     }
 
     const searchingPattern = `${this.typedString}${inputChar}`;
-    const matchedPatterns = this.patterns.filter((pattern) => pattern.startsWith(searchingPattern));
+    const matchedPatterns = this.patterns.filter((pattern) =>
+      pattern.startsWith(searchingPattern),
+    );
 
     if (matchedPatterns.length === 0) {
       return false;
@@ -289,29 +299,25 @@ class Section {
   }
 
   remined(): Remined {
-
     const searchingPattern = this.typedString;
-    const matchedPatterns = this.patterns.filter((pattern) => pattern.startsWith(searchingPattern));
+    const matchedPatterns = this.patterns.filter((pattern) =>
+      pattern.startsWith(searchingPattern),
+    );
 
-    const pattern = matchedPatterns.length > 0 ? matchedPatterns[0] : this.patterns[0];
+    const pattern =
+      matchedPatterns.length > 0 ? matchedPatterns[0] : this.patterns[0];
 
     return {
       currentChar: pattern[this.typedString.length],
       remainedStr: pattern.slice(this.typedString.length + 1),
       typedStr: this.typedString,
-    }
+    };
   }
 }
 
-const GameState = [
-  "pending",
-  "started",
-  "finished",
-  "cancelled",
-] as const;
+const GameState = ["pending", "started", "finished", "cancelled"] as const;
 
-export type GameState = typeof GameState[number];
-
+export type GameState = (typeof GameState)[number];
 
 export interface TypeState {
   char: string;

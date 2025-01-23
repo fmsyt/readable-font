@@ -9,5 +9,7 @@ export type GameContextType = {
 
 export const GameContext = createContext<GameContextType>({
   status: "loading",
-  reload: () => { throw new Error("GameContext not implemented"); },
+  reload: () => {
+    throw new Error("GameContext not implemented");
+  },
 });

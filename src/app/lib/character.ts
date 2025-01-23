@@ -38,13 +38,12 @@ export const KeyInputMap = (() => {
   return map;
 })();
 
-
 export type InputTree = {
   /**
    * 子ノードへのポインタ
    */
   children: CharacterNode[];
-}
+};
 
 export type CharacterNode = InputTree & {
   /**
@@ -72,11 +71,9 @@ export type CharacterNode = InputTree & {
    * 親ノードへのポインタ
    */
   parents: CharacterNode[];
-}
+};
 
 type InputPatterns = CharacterNode["patterns"];
-
-
 
 /**
  * 入力パターンをツリー構造に変換する
@@ -94,7 +91,7 @@ export function createInputTree(text: string) {
 
   const tree: InputTree = {
     children: [],
-  }
+  };
 
   let lastTailNodes: CharacterNode[] = [];
 
@@ -103,7 +100,6 @@ export function createInputTree(text: string) {
   let appendっNodes: CharacterNode[] = [];
 
   for (let i = 0; i < text.length; i++) {
-
     const char = t[i];
     if (char === "っ") {
       carryっ++;
@@ -123,19 +119,18 @@ export function createInputTree(text: string) {
     tailNodes = [];
     appendっNodes = [];
 
-
     if (carryっ && Vowel.includes(char)) {
       throw new Error("'っ' の後に母音が来ることはありません。");
     }
 
     if (!ContractedSound.includes(nextChar)) {
-
       const node: CharacterNode = {
         char,
-        patterns: char === "ん" && !Vowel.includes(nextChar) ? ["n", ...p1] : [...p1],
+        patterns:
+          char === "ん" && !Vowel.includes(nextChar) ? ["n", ...p1] : [...p1],
         parents: lastTailNodes,
         children: [],
-      }
+      };
 
       for (const parent of lastTailNodes) {
         parent.children.push(node);
@@ -145,9 +140,7 @@ export function createInputTree(text: string) {
 
       appendっNodes.push(node);
       tailNodes.push(node);
-
     } else {
-
       const p2 = KeyInputMap.get(nextChar);
       const p3 = KeyInputMap.get(char + nextChar);
 
@@ -160,7 +153,7 @@ export function createInputTree(text: string) {
           patterns: [...p3],
           parents: lastTailNodes,
           children: [],
-        }
+        };
 
         for (const parent of lastTailNodes) {
           parent.children.push(node);
@@ -179,14 +172,14 @@ export function createInputTree(text: string) {
           patterns: [...p1],
           parents: lastTailNodes,
           children: [],
-        }
+        };
 
         const item2: CharacterNode = {
           char: nextChar,
           patterns: [...p2],
           parents: [item1],
           children: [],
-        }
+        };
 
         item1.children.push(item2);
 
@@ -202,7 +195,6 @@ export function createInputTree(text: string) {
     }
 
     if (carryっ) {
-
       for (const node of appendっNodes) {
         const firstString = node.patterns[0];
         const firstChar = firstString[0];
@@ -213,10 +205,8 @@ export function createInputTree(text: string) {
         node.char = Array(carryっ).fill("っ").join("") + node.char;
       }
 
-
       carryっ = 0;
     }
-
   }
 
   return tree;
