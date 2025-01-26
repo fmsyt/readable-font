@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Game, GameState, Score, type Remined, type Sentence } from "../lib/game";
+import {
+  Game,
+  type GameState,
+  type Remined,
+  type Score,
+  type Sentence,
+} from "../lib/game";
 
 const sentences: Sentence[] = [
   {
@@ -23,7 +29,7 @@ export default function Playground() {
 
   const [text, setText] = useState("");
   const [gameState, setGameState] = useState<GameState>("pending");
-  const [score, setScore] = useState<Score|null>(null);
+  const [score, setScore] = useState<Score | null>(null);
 
   const [remind, setRemind] = useState<Remined | null>(null);
   const gameRef = useRef<Game | null>(null);
