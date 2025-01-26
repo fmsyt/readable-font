@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Game, type Remined, type Sentence } from "../lib/game";
+import { Game, GameState, Score, type Remined, type Sentence } from "../lib/game";
 
 const sentences: Sentence[] = [
   {
@@ -22,6 +22,8 @@ export default function Playground() {
   const playgroundRef = useRef<HTMLDivElement | null>(null);
 
   const [text, setText] = useState("");
+  const [gameState, setGameState] = useState<GameState>("pending");
+  const [score, setScore] = useState<Score|null>(null);
 
   const [remind, setRemind] = useState<Remined | null>(null);
   const gameRef = useRef<Game | null>(null);
@@ -31,8 +33,6 @@ export default function Playground() {
       return;
     }
 
-    console.log(playgroundRef.current);
-
     const game = new Game({
       sentences,
       playgroundElement: globalThis,
@@ -41,10 +41,11 @@ export default function Playground() {
         setRemind(remained);
       },
       onStart: () => {
-        console.log("start");
+        setGameState("started");
       },
       onFinished: (score) => {
-        console.log("finished", score);
+        setGameState("finished");
+        setScore(score);
       },
     });
 
@@ -61,6 +62,7 @@ export default function Playground() {
   return (
     <div ref={playgroundRef} className="w-full max-w-96">
       <h1>Game</h1>
+      <p>State: {gameState}</p>
       <input
         type="text"
         value={text}
@@ -75,7 +77,7 @@ export default function Playground() {
       </div>
       <div className="mt-4 mockup-code max-h-96 overflow-y-auto">
         <pre>
-          <code>{JSON.stringify(remind, null, 2)}</code>
+          <code>{JSON.stringify(score, null, 2)}</code>
         </pre>
       </div>
     </div>
