@@ -68,6 +68,11 @@ export default function Playground() {
         placeholder="Type here..."
         className="w-full p-2 mt-2 border border-gray-300 rounded-md"
       />
+      <div className="mt-4 p-2">
+        <span className="text-blue-500">{remind?.typedStr}</span>
+        <span className="text-red-500">{remind?.currentChar}</span>
+        <span>{remind?.remainedStr}</span>
+      </div>
       <div className="mt-4 mockup-code max-h-96 overflow-y-auto">
         <pre>
           <code>{JSON.stringify(remind, null, 2)}</code>
